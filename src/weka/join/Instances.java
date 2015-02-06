@@ -19,6 +19,7 @@ public class Instances extends weka.core.Instances {
 	public Instances(weka.core.Instances dataset) {
 		super(dataset);
 	}
+	
 	public Instances(Instances source, int first, int toCopy) {
 		super(source, first,toCopy);
 	}
@@ -40,7 +41,7 @@ public class Instances extends weka.core.Instances {
 		return index;
 	}
 	public void dropIndex() {
-		index = null;
+		index = null;		
 		indexAttr = null;
 	}		
 	
