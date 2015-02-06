@@ -45,7 +45,6 @@ public class Instances extends weka.core.Instances {
 	}		
 	
 	private Instances join(Instances source, Attribute key, boolean leftJoin, boolean fullJoin) {
-		
 		// Prepare target Instances and select Attributes to copy from source
 		Instances target = new Instances(this,0,0);		
 		Enumeration<Attribute> attributes = source.enumerateAttributes();
@@ -103,6 +102,7 @@ public class Instances extends weka.core.Instances {
 	}		
 	
 
+	
 	public Instances innerJoin(Instances source) {
 		return this.join(source,null,false,false);
 	}
@@ -123,11 +123,72 @@ public class Instances extends weka.core.Instances {
 	}
 		
 	public Instances update(Instances source, Attribute key) {
-		// to merge with other file
-		return null;
-	}
+		// Prepare target Instances and select Attributes to copy from source
+		Instances target = new Instances(this,0,0);		
+		// Mapping of Attribute: source -> target
+		HashMap<Attribute,Attribute> paired = new HashMap();
+		Enumeration<Attribute> sourceAttrs = source.enumerateAttributes();		
+		while (sourceAttrs.hasMoreElements()) {
+			Attribute sourceAttr = sourceAttrs.nextElement();
+			Enumeration<Attribute> attrs = target.enumerateAttributes();			
+			while (attrs.hasMoreElements()) {
+				Attribute attr = attrs.nextElement();							
+				if ( sourceAttr.name().equals(attr.name()) && sourceAttr.type() == attr.type() && attr != key ) {
+					// Rebuilding range of nominal levels
+					if (attr.isNominal()) {
+						HashSet<String> levels = new HashSet<String>();
+						for (Enumeration<String> values : Arrays.asList(attr.enumerateValues(), sourceAttr.enumerateValues())) 
+							while (values.hasMoreElements()) 
+								levels.add(values.nextElement());
+						FastVector levelsAttribute = new FastVector();
+						for (String level : levels)
+							levelsAttribute.addElement(level);
+						int position = attr.index();
+						target.deleteAttributeAt(position);
+						attr = new Attribute(attr.name(), levelsAttribute);
+						target.insertAttributeAt(attr, position);
+						paired.put(sourceAttr, attr);
+					} else paired.put(sourceAttr, attr);
+				}
+			}			
+		}
+		// Get sourceIndex 
+		Index sourceIndex = source.getIndex();  		
+		// Iterate through all Instance (full scan)
+		Enumeration<Instance> rows = this.enumerateInstances();
+		while (rows.hasMoreElements()) {
+			Instance row = rows.nextElement();
+			Double sourceKey = new Double(row.value(key));
+			if (sourceIndex.containsKey(sourceKey)) {
+				for (Integer position : sourceIndex.get(sourceKey)) {					
+					Instance sourceRow = source.instance(position);
+					double[] rawData = row.toDoubleArray();
+					for (Entry<Attribute,Attribute> pair : paired.entrySet()) {
+						Attribute sourceAttr = pair.getKey();
+						Attribute targetAttr = pair.getValue();
+						int index = (int) target.attribute(targetAttr.name()).index();						
+						if (sourceRow.isMissing(sourceAttr)) {
+							rawData[index] = Instance.missingValue();
+						} else {
+							if (targetAttr.isNumeric() || targetAttr.isDate() ) rawData[index] = sourceRow.value(sourceAttr);
+							if (targetAttr.isNominal()) {								
+								String level = sourceAttr.value((int)sourceRow.value(sourceAttr));							
+								rawData[index] = (double) targetAttr.indexOfValue(level); 
+							}				
+							if (targetAttr.isString()) {
+								String level = sourceAttr.value((int)sourceRow.value(sourceAttr)); 
+								rawData[index] = (double) target.attribute(targetAttr.name()).addStringValue(level);
+							}
+						}
+					}
+					target.add(new Instance(1.0, rawData));
+				}				
+			} else target.add(new Instance(row));			
+		}
+		return target;
+	}	
 	public Instances update(Instances source) {
-		return update(source, source.indexAttr); 
+		return update(source, indexAttr);
 	}
 
 }
