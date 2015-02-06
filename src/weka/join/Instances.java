@@ -103,7 +103,6 @@ public class Instances extends weka.core.Instances {
 	}		
 	
 
-	
 	public Instances innerJoin(Instances source) {
 		return this.join(source,null,false,false);
 	}
