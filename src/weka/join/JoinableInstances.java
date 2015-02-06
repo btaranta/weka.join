@@ -4,7 +4,7 @@
 package weka.join;
 
 /**
- * For JavaDoc of new methods.
+ * For JavaDoc of implemented methods.
  * @see weka.core.Instances
  * @author Bogdan Taranta
  *
