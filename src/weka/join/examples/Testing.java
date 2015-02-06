@@ -11,13 +11,9 @@ public class Testing {
 		//Instances result = table1.innerJoin(table2, table1.attribute("Id"));
 		//Instances result = table1.innerJoin(table2);
 		
-		Instances table1 = new Instances(ExamplesReader.getInstances("UpdateTarget.arff"));
-		Instances table2 = new Instances(ExamplesReader.getInstances("UpdateSource.arff"));
-		table1.makeIndex(table1.attribute("Id"));
-		table2.makeIndex(table2.attribute("Id"));		
-		Instances target = table1.update(table2);	
+		Instances table1 = new Instances(ExamplesReader.getInstances("Countries.arff"));
 		
-		System.out.println(target);
+		System.out.println(table1);
 		
 		/*join*/
 		/*update*/
