@@ -1,0 +1,15 @@
+@RELATION Countries
+
+@ATTRIBUTE 	Country_Id	NUMERIC
+@ATTRIBUTE 	Continent_Id NUMERIC
+@ATTRIBUTE	Country	STRING
+@ATTRIBUTE	Currency {PLN,EUR,USD}		
+@ATTRIBUTE	Population NUMERIC 
+@ATTRIBUTE	Updated date "yyyy-MM-dd"	
+
+@DATA
+1,1,"Poland",PLN,38.5,'2014-01-01'
+2,1,"Germany",EUR,80.7,'2014-01-01'
+3,1,"France",EUR,?,'2014-01-01'
+4,2,"USA",USD,320,'2014-01-01'
+5,3,"Senegal",?,?,'2014-01-01'

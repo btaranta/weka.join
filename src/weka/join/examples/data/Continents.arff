@@ -1,0 +1,10 @@
+@RELATION Continents
+
+@ATTRIBUTE 	Continent_Id NUMERIC
+@ATTRIBUTE	Name STRING
+
+@DATA
+1,"Europe"
+2,"America"
+3,"Africa"
+4,"Asia"
