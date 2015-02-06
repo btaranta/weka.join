@@ -1,0 +1,12 @@
+@RELATION Table1
+
+@ATTRIBUTE Id	NUMERIC
+@ATTRIBUTE Color   STRING
+  
+@DATA
+1,"Light Red"
+1,"Dark Red"
+1,"Pink"
+2,"Light Green"
+2,"Very light green"
+?,"Blue"
