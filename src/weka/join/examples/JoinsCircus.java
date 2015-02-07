@@ -18,7 +18,7 @@ public class JoinsCircus {
 		table1.makeIndex(table1.attribute("Continent_Id"));
 		table2.makeIndex(table2.attribute("Continent_Id"));
 				
-		// Report
+		// Report 
 		System.out.println(table1+"\n");
 		System.out.println(table2+"\n");
 		for (Instances target : Arrays.asList(table1, table2)) 
