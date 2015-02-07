@@ -1,7 +1,7 @@
 @RELATION Continents
 
-@ATTRIBUTE 	Continent_Id NUMERIC
-@ATTRIBUTE	Name STRING
+@ATTRIBUTE 	Continent_Id  NUMERIC
+@ATTRIBUTE	Continent STRING
 
 @DATA
 1,"Europe"

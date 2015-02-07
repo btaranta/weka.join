@@ -1,0 +1,13 @@
+@RELATION CountriesUpdate
+
+@ATTRIBUTE 	Country_Id	NUMERIC
+@ATTRIBUTE	Currency {CFA}		
+@ATTRIBUTE	Population NUMERIC
+@ATTRIBUTE	Updated date "yyyy-MM-dd"
+@ATTRIBUTE	Country	STRING
+@ATTRIBUTE	SomeNumber NUMERIC
+
+@DATA
+3,?,66.3,'2014-01-02',?,999
+4,?,?,'2014-01-02',"United States of America",999
+5,CFA,12.6,'2014-01-02',?,999
