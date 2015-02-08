@@ -15,7 +15,6 @@ import weka.core.Instance;
 
 
 public class Instances extends weka.core.Instances {
-	private static final long serialVersionUID = 1L;
 	public Instances(weka.core.Instances dataset) {
 		super(dataset);
 	}
@@ -37,7 +36,8 @@ public class Instances extends weka.core.Instances {
 	public boolean hasIndex() {
 		return (index != null);
 	}
-	public Index getIndex() {
+	public Index getIndex() throws MissingIndexException {
+		if (!hasIndex()) throw new MissingIndexException();
 		return index;
 	}
 	public void dropIndex() {
@@ -45,7 +45,7 @@ public class Instances extends weka.core.Instances {
 		indexAttr = null;
 	}		
 	
-	private Instances join(Instances source, Attribute key, boolean leftJoin, boolean fullJoin) {
+	private Instances join(Instances source, Attribute key, boolean leftJoin, boolean fullJoin) throws MissingIndexException {
 		// Prepare target Instances and select Attributes to copy from source
 		Instances target = new Instances(this,0,0);		
 		Enumeration<Attribute> attributes = source.enumerateAttributes();
@@ -102,28 +102,26 @@ public class Instances extends weka.core.Instances {
 		return target;
 	}		
 	
-
-	
-	public Instances innerJoin(Instances source) {
+	public Instances innerJoin(Instances source) throws MissingIndexException {
 		return this.join(source,null,false,false);
 	}
-	public Instances fullJoin(Instances source) {
+	public Instances fullJoin(Instances source) throws MissingIndexException {
 		return this.join(source,null,true,true);
 	}
-	public Instances leftJoin(Instances source) {
+	public Instances leftJoin(Instances source) throws MissingIndexException {
 		return this.join(source,null,true,false);
 	}	
-	public Instances innerJoin(Instances source, Attribute key) {
+	public Instances innerJoin(Instances source, Attribute key) throws MissingIndexException {
 		return this.join(source,key,false,false);
 	}
-	public Instances fullJoin(Instances source, Attribute key) {
+	public Instances fullJoin(Instances source, Attribute key) throws MissingIndexException {
 		return this.join(source,key,true,true);
 	}
-	public Instances leftJoin(Instances source, Attribute key) {
+	public Instances leftJoin(Instances source, Attribute key) throws MissingIndexException {
 		return this.join(source,key,true,false);
 	}
 		
-	public Instances update(Instances source, Attribute key) {
+	public Instances update(Instances source, Attribute key) throws MissingIndexException {
 		// Prepare target Instances and select Attributes to copy from source
 		Instances target = new Instances(this,0,0);		
 		// Mapping of Attribute: source -> target
@@ -188,8 +186,83 @@ public class Instances extends weka.core.Instances {
 		}
 		return target;
 	}	
-	public Instances update(Instances source) {
+	public Instances update(Instances source) throws MissingIndexException {
 		return update(source, indexAttr);
+	}
+	
+	public Instances union(Instances source) {
+		// Prepare target Instances and select Attributes to copy from source
+		Instances target = new Instances(this,0,0);		
+		// Merging attributes from source and this into target 
+		Enumeration<Attribute> sourceAttrs = source.enumerateAttributes();		
+		while (sourceAttrs.hasMoreElements()) {
+			Attribute sourceAttr = sourceAttrs.nextElement();
+			Enumeration<Attribute> attrs = target.enumerateAttributes();
+			boolean found = false;
+			while (attrs.hasMoreElements()) {
+				Attribute attr = attrs.nextElement();
+				if (sourceAttr.name().equals(attr.name())) {
+					found = true;
+					if ( sourceAttr.type() == attr.type() ) {
+						if ( attr.isNominal() ) {
+							HashSet<String> levels = new HashSet<String>();
+							for (Enumeration<String> values : Arrays.asList(attr.enumerateValues(), sourceAttr.enumerateValues())) 
+								while (values.hasMoreElements()) 
+									levels.add(values.nextElement());
+							FastVector levelsAttribute = new FastVector();
+							for (String level : levels)
+								levelsAttribute.addElement(level);
+							int position = attr.index();
+							target.deleteAttributeAt(position);
+							attr = new Attribute(attr.name(), levelsAttribute);
+							target.insertAttributeAt(attr, position);
+						}
+					}
+				}
+			}
+			if (!found) {
+				target.insertAttributeAt((Attribute) sourceAttr.copy(), target.numAttributes());
+			}
+		}				
+		// Copy all Instance from this (full scan), set missing from Attributes from source 
+		Enumeration<Instance> rows = this.enumerateInstances();
+		while (rows.hasMoreElements()) {
+			double[] rawData = Arrays.copyOf(rows.nextElement().toDoubleArray(), target.numAttributes());
+			for (int k=this.numAttributes(); k < rawData.length; k++)
+				rawData[k] = Instance.missingValue();
+			target.add(new Instance(1.0, rawData));
+		}
+		// Copy all Instance from source (full scan), set missing from Attributes from source or merge them		
+		rows = source.enumerateInstances();
+		while (rows.hasMoreElements()) {
+			Instance sourceRow = rows.nextElement();
+			double[] rawData = new double[target.numAttributes()];
+			for (int k=0; k < rawData.length; k++) 
+				rawData[k] = Instance.missingValue();
+			sourceAttrs = source.enumerateAttributes();
+			while (sourceAttrs.hasMoreElements()) {
+				Attribute sourceAttr = sourceAttrs.nextElement();
+				Attribute targetAttr = target.attribute(sourceAttr.name());
+				if (targetAttr != null) {
+					int index = (int) target.attribute(targetAttr.name()).index();						
+					if (sourceRow.isMissing(sourceAttr)) {
+						rawData[index] = Instance.missingValue();
+					} else {
+						if (targetAttr.isNumeric() || targetAttr.isDate() ) rawData[index] = sourceRow.value(sourceAttr);
+						if (targetAttr.isNominal()) {								
+							String level = sourceAttr.value((int)sourceRow.value(sourceAttr));							
+							rawData[index] = (double) targetAttr.indexOfValue(level); 
+						}				
+						if (targetAttr.isString()) {
+							String level = sourceAttr.value((int)sourceRow.value(sourceAttr)); 
+							rawData[index] = (double) target.attribute(targetAttr.name()).addStringValue(level);
+						}
+					}
+				}
+			}			
+			target.add(new Instance(1.0, rawData));
+		}
+	return target;
 	}
 	
 

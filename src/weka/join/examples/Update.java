@@ -1,10 +1,11 @@
 package weka.join.examples;
 
 import weka.join.Instances;
+import weka.join.MissingIndexException;
 
 public class Update {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws MissingIndexException  {
 
 		Instances table1 = new Instances(ExamplesReader.getInstances("Countries.arff"));
 		Instances table2 = new Instances(ExamplesReader.getInstances("CountriesUpdate.arff"));

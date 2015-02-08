@@ -1,0 +1,10 @@
+@RELATION Continents
+
+
+@ATTRIBUTE 	Continent_Id  NUMERIC
+@ATTRIBUTE	Continent STRING
+@ATTRIBUTE	RandomNumber NUMERIC
+@ATTRIBUTE  RandomNominal {a,b,c}
+
+@DATA
+3,"Africa",999,a

@@ -5,7 +5,7 @@ import weka.join.*;
 
 public class QuickStart {
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws MissingIndexException {
 		
 		Instances table1 = new Instances(ExamplesReader.getInstances("Countries.arff"));
 		Instances table2 = new Instances(ExamplesReader.getInstances("Continents.arff"));
