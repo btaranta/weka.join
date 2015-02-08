@@ -45,6 +45,7 @@ table1.makeIndex(table1.attribute("Continent_ID");
 table2.makeIndex(table2.attribute("Continent_ID");
 Instances result = table1.leftJoin(table2);
 ```
+Full example can be found in [```QuickStart.java```](/src/weka/join/examples/QuickStart.java)
 
 # Author
 Bogdan Taranta ([LinkedIn](http://linkedin.com/in/taranta))
